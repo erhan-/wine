@@ -1221,7 +1221,7 @@ static void ALSA_AddMidiPort(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* 
 	MODM_NumDevs++;
     }
     if (cap & SND_SEQ_PORT_CAP_READ) {
-        TRACE("IN  (%d:%s:%s:%d:%s:%x)\n",snd_seq_client_info_get_client(cinfo),
+        TRACE("IN with mod  (%d:%s:%s:%d:%s:%x)\n",snd_seq_client_info_get_client(cinfo),
 			                  snd_seq_client_info_get_name(cinfo),
 					  snd_seq_client_info_get_type(cinfo) == SND_SEQ_USER_CLIENT ? "user" : "kernel",
 					  snd_seq_port_info_get_port(pinfo),
@@ -1248,6 +1248,11 @@ static void ALSA_AddMidiPort(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* 
 	/* Try to use both client and port names, if this is too long take the port name only.
            In the second case the port name should be explicit enough due to its big size.
 	 */
+
+    /* The old and new Pioneer string */
+    static const WCHAR PioneerOldW[] = {'P','I','O','N','E','E','R',' ','D','D','J','-','S','R',' ','M','I','D','I',' ','1',0};
+    static const WCHAR PioneerNewW[] = {'P','I','O','N','E','E','R',' ','D','D','J','-','S','R',0};
+
 	if ( (strlen(snd_seq_client_info_get_name(cinfo)) + strlen(snd_seq_port_info_get_name(pinfo)) + 3) < MAXPNAMELEN ) {
 	    sprintf(midiPortName, "%s - %s", snd_seq_client_info_get_name(cinfo), snd_seq_port_info_get_name(pinfo));
 	} else {
@@ -1255,6 +1260,15 @@ static void ALSA_AddMidiPort(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* 
         }
         MultiByteToWideChar(CP_UNIXCP, 0, midiPortName, -1, MidiInDev[MIDM_NumDevs].caps.szPname,
                             ARRAY_SIZE(MidiInDev[MIDM_NumDevs].caps.szPname));
+    /* Check if the device name looks like the old PIONEER string and change it in case */
+    if (wcsncmp(MidiInDev[MIDM_NumDevs].caps.szPname, PioneerOldW, lstrlenW(PioneerOldW)) != 0) {
+        TRACE("Changing PIONEER name.");
+        wcsncpy(MidiInDev[MIDM_NumDevs].caps.szPname, PioneerNewW, lstrlenW(PioneerNewW))
+    } else {
+        TRACE("Not changing PIONEER name.");
+    }
+        
+
 	MidiInDev[MIDM_NumDevs].state = 0;
 
 	TRACE("MidiIn [%d]\tname='%s' support=%d\n"
