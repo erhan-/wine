@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -1263,7 +1264,7 @@ static void ALSA_AddMidiPort(snd_seq_client_info_t* cinfo, snd_seq_port_info_t* 
     /* Check if the device name looks like the old PIONEER string and change it in case */
     if (wcsncmp(MidiInDev[MIDM_NumDevs].caps.szPname, PioneerOldW, lstrlenW(PioneerOldW)) != 0) {
         TRACE("Changing PIONEER name.");
-        wcsncpy(MidiInDev[MIDM_NumDevs].caps.szPname, PioneerNewW, lstrlenW(PioneerNewW))
+        wcsncpy(MidiInDev[MIDM_NumDevs].caps.szPname, PioneerNewW, lstrlenW(PioneerNewW));
     } else {
         TRACE("Not changing PIONEER name.");
     }
